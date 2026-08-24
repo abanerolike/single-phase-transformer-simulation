@@ -216,3 +216,24 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ============================
+# Ansys Electronics Desktop (AEDT) / PyAEDT
+# ============================
+
+# Raw AEDT project files: binary format, requires a licensed AEDT install to open,
+# and doesn't render on GitHub. Keep only the notebooks + exported images/CSVs instead.
+*.aedt
+
+# Project result/cache folders generated alongside .aedt files
+*.aedtresults/
+*.pyaedt/
+
+# Session lock files (created while a project is open in AEDT)
+*.aedt.lock
+
+# AEDT temp/batch logs
+batch.log
+
+# Local personal library (materials, etc.) - machine-specific, not portable
+PersonalLib/
