@@ -237,3 +237,4 @@ batch.log
 
 # Local personal library (materials, etc.) - machine-specific, not portable
 PersonalLib/
+.vscode/
