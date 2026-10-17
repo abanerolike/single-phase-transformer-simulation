@@ -11,14 +11,14 @@ The transformer model itself is the next step and is still in progress (see [Tra
 **Torque dip at 90° and 270° is geometry, not mesh** ([Week1_ex1](Examples/Week1/Week1_ex1/Week1_ex1_angle_sweep_analysis.ipynb))
 A rotating coil next to a permanent magnet should give a sin θ torque curve, but the sweep showed sharp dips at 90° and 270°. Re-solving 90° with twice the mesh changed the torque by only 0.1 µN·m, so convergence was ruled out. Top-view field plots showed that the coil becomes symmetric with the magnet at those angles, and the torque from its two halves partly cancels. A uniform-field sin θ model can't capture that.
 
+**A force curve that bends for a real reason** ([Week1_ex2](Examples/Week1/Week1_ex2/Week1_ex2_analysis.ipynb))
+A C-core actuator with a magnet bias should give a smooth parabola in current, but the force stayed near zero up to about 100 A and then rose quickly. A simple reluctance circuit was 12× off, and re-solving every point with its own mesh made the kink sharper, not smaller. Two field probes then showed that at 0 A over 98% of the magnet's flux circulates in an all-steel loop that is already near 1.17 T. As the coil current rises, it pushes more of that flux out through the air gap (the gap/loop ratio grows from 0.0145 to 0.0857). So the kink is a two-path magnetic circuit near saturation, not an error in the model.
+
 **Two separate artifacts in one straight-wire field plot** ([Week2_ex1](Examples/Week2/Week2_ex1/Week2_ex1_analysis.ipynb))
 The H-field around a straight wire showed a +4.30% / −7.59% sawtooth right at the wire surface and a −21% error at the far end of the probe line. The first came from the 12-sided wire cross-section: with 36 sides it dropped to +0.94% / −0.51%. The second came from the probe line ending exactly on the radiation boundary: tripling the region size brought it from −21.46% to −0.21%. Neither was a real field effect.
 
 **A normal force that shouldn't exist** ([Week5_ex2](Examples/Week5/Week5_ex2/Week5_ex2_analysis.ipynb))
 In a 1-slot linear motor, symmetry says the normal force on the coil is zero, but the solver reported about a quarter of the thrust. A companion run computed the Lorentz force and the virtual force side by side in the same solve. The Lorentz force showed almost no normal component, and its thrust (4.98 N) matched a 3D charge model to 0.2%. The extra force came from using virtual force on non-magnetic objects (copper coil and an air slot), which even reported a force on the air region.
-
-**Exported current was 1000× too large** ([Week5_ex3](Examples/Week5/Week5_ex3/Week5_ex3_analysis.ipynb))
-The CSV said the peak current was 2250 A, while the design value was 2.25 A. The AEDT report itself was correct, and the force constant confirmed 2.25 A independently. The cause was `get_solution_data().data_real()`, which returns values in the report's display unit (mA here) unless `convert_to_SI=True` is passed. The export now uses it.
 
 ## Environment and license limits
 
@@ -94,7 +94,7 @@ The analysis notebooks don't need AEDT, so they can be read directly on GitHub. 
 | <img src="Examples/Week4/Week4_ex2/Images/Week4_ex2_result_image.png" width="120"> | [Week4_ex2](Examples/Week4/Week4_ex2) Induction heating core, ferrite | [Light check](Examples/Week4/Week4_ex1/Week4_ex1_to_2_analysis.ipynb) | Field rises about 160× to 1.79 T, between the 1.47–2.07 T magnetic-circuit bounds (linear μr, no saturation). |
 | <img src="Examples/Week4/Week4_ex3/Images/Week4_ex3_result_image.png" width="120"> | [Week4_ex3](Examples/Week4/Week4_ex3) Force between parallel wires | [Light check](Examples/Week4/Week4_ex3/Week4_ex3_to_4_analysis.ipynb) | Within +0.2–0.5% of μ0I²L/(2πd). |
 | <img src="Examples/Week4/Week4_ex4/Images/Week4_ex4_result_image.png" width="120"> | [Week4_ex4](Examples/Week4/Week4_ex4) Force between crossed wires | [Light check](Examples/Week4/Week4_ex3/Week4_ex3_to_4_analysis.ipynb) | Field 50% high at the line ends because of the region walls. A model with walls matches within ~3%. |
-| <img src="Examples/Week4/Week4_ex5/Images/Week4_ex5_result_image.png" width="120"> | [Week4_ex5](Examples/Week4/Week4_ex5) Simple DC machine | [Light check](Examples/Week4/Week4_ex5/Week4_ex5_analysis.ipynb) | Torque within 0.11% of NIAB, and k_T/k_E = 0.9989 from two independent outputs. |
+| <img src="Examples/Week4/Week4_ex5/Images/Week4_ex5_result_image.png" width="120"> | [Week4_ex5](Examples/Week4/Week4_ex5) Simple DC machine | [Light check](Examples/Week4/Week4_ex5/Week4_ex5_analysis.ipynb) | Torque within 0.11% of NIAB. Torque and back-EMF give the same machine constant (k_T/k_E = 0.9989). The leftover +0.8 mWb flux offset is the coil's own L·I. |
 
 ### Week 5 – Permanent magnets and linear motors
 
