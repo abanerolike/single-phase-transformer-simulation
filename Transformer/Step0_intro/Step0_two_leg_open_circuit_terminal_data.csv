@@ -1,0 +1,2 @@
+"Freq [kHz]","InputVoltage(Primary) [V]","InducedVoltage(Primary) [V]","InducedVoltage(Secondary) [V]","FluxLinkage(Primary) [Wb]","Current(Primary) [mA]","CoreLoss [uW]","Matrix1.L(Primary, Primary) [mH]","Matrix1.CplCoef(Primary, Secondary) []"
+1,50 + 0i,50 + 0.0241155i,-24.5964 - 0.0122362i,3.83811E-06 - 0.00795775i,0.610353977017585 - 1232.24268725411i,233.483,6.4579366422899,-0.983766548951782
