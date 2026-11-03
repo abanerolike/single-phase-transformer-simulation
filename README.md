@@ -2,6 +2,8 @@
 
 Electromagnetic simulation exercises in Ansys Maxwell 2D/3D, scripted end to end with PyAEDT, as groundwork for modeling a single-phase transformer.
 
+The exercise models are based on lab examples from a university course. I cleaned up and re-ran the build notebooks, and wrote the analysis notebooks and companion runs myself.
+
 Each exercise builds and solves a model from a Jupyter notebook. For most of them I also wrote a separate analysis notebook that checks the result against a closed-form formula or a simple physical model. When the two didn't agree, I tried to find out why instead of just accepting the number. Several of those gaps turned out to be modeling or measurement artifacts, and a couple turned out to be real physics.
 
 The transformer model itself is the next step and is still in progress (see [Transformer model](#transformer-model-in-progress)).
@@ -13,6 +15,9 @@ A rotating coil next to a permanent magnet should give a sin θ torque curve, bu
 
 **A force curve that bends for a real reason** ([Week1_ex2](Examples/Week1/Week1_ex2/Week1_ex2_analysis.ipynb))
 A C-core actuator with a magnet bias should give a smooth parabola in current, but the force stayed near zero up to about 100 A and then rose quickly. A simple reluctance circuit was 12× off, and re-solving every point with its own mesh made the kink sharper, not smaller. Two field probes then showed that at 0 A over 98% of the magnet's flux circulates in an all-steel loop that is already near 1.17 T. As the coil current rises, it pushes more of that flux out through the air gap (the gap/loop ratio grows from 0.0145 to 0.0857). So the kink is a two-path magnetic circuit near saturation, not an error in the model.
+
+**A force on a lone magnet that comes from the region walls** ([Week1_ex3](Examples/Week1/Week1_ex3/Week1_ex3_analysis.ipynb))
+A single magnet with no other field source around it should feel zero net force, but a position sweep gave a smooth curve from +1.96 N to −1.91 N. Every point had converged on its own mesh, and the two peaks sat where the magnet came closest to the region wall (3.5 cm). Two companion runs then changed only the walls. Tripling the region padding cut the rms force by 69%. Keeping the original size but switching the walls from the default (no flux through the wall) to zero tangential H flipped the sign of the force at all 10 points above 0.5 N. So the curve is the magnet's image force from the region walls. About 0.28 N rms of point-to-point scatter is left in the larger region, and I haven't pinned that down yet.
 
 **Two separate artifacts in one straight-wire field plot** ([Week2_ex1](Examples/Week2/Week2_ex1/Week2_ex1_analysis.ipynb))
 The H-field around a straight wire showed a +4.30% / −7.59% sawtooth right at the wire surface and a −21% error at the far end of the probe line. The first came from the 12-sided wire cross-section: with 36 sides it dropped to +0.94% / −0.51%. The second came from the probe line ending exactly on the radiation boundary: tripling the region size brought it from −21.46% to −0.21%. Neither was a real field effect.
@@ -29,7 +34,7 @@ The Student license shaped a lot of the work:
 
 - **No Transient solver.** When motion isn't the point of the exercise, I replaced time with a design variable (`t_sample`, rotor angle, gap, current) and swept it with Magnetostatic. Eddy-current braking (Week5_ex4, ex5) really needs motion, so those notebooks are kept as documented limitations, with a full-license version next to the Student one.
 - **Mesh caps** (64,000 elements in 3D, only 2,000 in 2D). The 4-pole 3-slot IPM machine in Week6_ex3 can't fit under the 2D cap, and with no common divisor between poles and slots there's no symmetry to cut the model with.
-- **PyAEDT wrapper issues.** In 2025 R2 the EddyCurrent solver is called "AC Magnetic" internally, and several PyAEDT 0.15.3 helpers fail on it (`create_setup`, `assign_radiation`, `get_solution_data`). Those notebooks call the AEDT API directly instead. Optimetrics sweeps also didn't keep force results per point, so force sweeps run as plain Python loops.
+- **PyAEDT wrapper issues.** In 2025 R2 the EddyCurrent solver is called "AC Magnetic" internally, and several PyAEDT 0.15.3 helpers fail on it (`create_setup`, `assign_radiation`, `get_solution_data`). `assign_zero_tangential_h_field` also refuses Magnetostatic designs, even though AEDT itself allows that boundary there. Those notebooks call the AEDT API directly instead. Optimetrics sweeps also didn't keep force results per point, so force sweeps run as plain Python loops.
 
 ## How the repository is organized
 
@@ -62,7 +67,7 @@ The analysis notebooks don't need AEDT, so they can be read directly on GitHub. 
 |---|---|---|---|
 | <img src="Examples/Week1/Week1_ex1/Images/Week1_ex1_result_image.png" width="120"> | [Week1_ex1](Examples/Week1/Week1_ex1) Torque on a rotated permanent magnet | Deep dive ([1](Examples/Week1/Week1_ex1/Week1_ex1_analysis.ipynb), [2](Examples/Week1/Week1_ex1/Week1_ex1_angle_sweep_analysis.ipynb)) | 28.3 µN·m at 45°. Angle sweep dips at 90°/270° come from coil–magnet symmetry, not the mesh. |
 | <img src="Examples/Week1/Week1_ex2/Images/Week1_ex2_result_image.png" width="120"> | [Week1_ex2](Examples/Week1/Week1_ex2) Force sweep on a C-core electromagnet | [Deep dive](Examples/Week1/Week1_ex2/Week1_ex2_analysis.ipynb) | The kink near 100 A is real. The magnet's flux splits between the steel loop and the air gap, and the split shifts as the core nears saturation. |
-| <img src="Examples/Week1/Week1_ex3/Images/Week1_ex3_result_image.png" width="120"> | [Week1_ex3](Examples/Week1/Week1_ex3) Force vs. magnet position | [Deep dive](Examples/Week1/Week1_ex3/Week1_ex3_analysis.ipynb) | The ~4 N swing in Force_z comes from the magnet getting within 3.5 cm of the region wall. |
+| <img src="Examples/Week1/Week1_ex3/Images/Week1_ex3_result_image.png" width="120"> | [Week1_ex3](Examples/Week1/Week1_ex3) Force vs. magnet position | [Deep dive](Examples/Week1/Week1_ex3/Week1_ex3_analysis.ipynb) | The ~4 N swing in Force_z is an image force from the region walls. A 3× larger region cuts it by 69%, and zero tangential H walls flip its sign. |
 | <img src="Examples/Week1/Week1_ex4/Images/Week1_ex4_result_image.png" width="120"> | [Week1_ex4](Examples/Week1/Week1_ex4) Eddy currents in an aluminum plate | [Light check](Examples/Week1/Week1_ex4/Week1_ex4_analysis.ipynb) | Skin depth 5.8 mm in a 19 mm plate, so the current concentrates near both faces. |
 | <img src="Examples/Week1/Week1_ex5/Images/Week1_ex5_result_image.png" width="120"> | [Week1_ex5](Examples/Week1/Week1_ex5) Induction heating of a disk | [Light check](Examples/Week1/Week1_ex5/Week1_ex5_analysis.ipynb) | Cast iron 65.9 W, stainless 51.7 W, ferrite ~0 W. Only cast iron is limited by skin depth. |
 
